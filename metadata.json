@@ -1,0 +1,12 @@
+{
+  "name": "NomadSphere",
+  "description": "Premium AI-powered companion for digital nomads to find perfect remote-work destinations and manage logistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "AI Recommendations",
+    "Visa Logistics",
+    "Itinerary Generation",
+    "Digital Nomad Toolkit"
+  ]
+}
+

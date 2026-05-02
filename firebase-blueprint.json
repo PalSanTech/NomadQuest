@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Public profile for nomad networking",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "interests": { "type": "array", "items": { "type": "string" } },
+        "wealth": { "type": "string", "enum": ["budget", "comfortable", "luxury"] },
+        "currentCity": { "type": "string", "description": "City where the nomad is currently working" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "interests", "wealth", "updatedAt"]
+    },
+    "CheckIn": {
+      "title": "City Check-In",
+      "description": "Records where users are or plan to be",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "city": { "type": "string" },
+        "country": { "type": "string" },
+        "status": { "type": "string", "enum": ["current", "planning"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "city", "country", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles for networking"
+    },
+    "/checkins/{checkInId}": {
+      "schema": "CheckIn",
+      "description": "Active check-ins at nomad hotspots"
+    }
+  }
+}

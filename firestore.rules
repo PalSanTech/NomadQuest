@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 1. Users Collection
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'name', 'interests', 'wealth', 'updatedAt'])
+               && data.keys().size() == 5
+               && data.uid == request.auth.uid
+               && data.name is string && data.name.size() <= 100
+               && data.interests is list && data.interests.size() <= 10
+               && data.wealth in ['budget', 'comfortable', 'luxury']
+               && data.updatedAt is number;
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // Social networking allows listing users
+      
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) 
+                    && isValidUser(request.resource.data)
+                    && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'interests', 'wealth', 'updatedAt', 'currentCity']) || request.resource.data.diff(resource.data).affectedKeys().size() == 0);
+    }
+
+    // 2. CheckIns Collection (For future scale)
+    match /checkins/{checkInId} {
+      function isValidCheckIn(data) {
+        return data.keys().hasAll(['uid', 'city', 'country', 'status', 'timestamp'])
+               && data.uid == request.auth.uid
+               && data.city is string && data.city.size() <= 100
+               && data.country is string && data.country.size() <= 100;
+      }
+
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidCheckIn(request.resource.data);
+    }
+
+    // 3. Test Connection
+    match /test/connection {
+      allow get: if true;
+    }
+  }
+}
